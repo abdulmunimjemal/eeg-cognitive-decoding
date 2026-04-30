@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eeg-cognitive"
+version = "0.1.0"
+description = "Comparing classical FBCSP+LDA against EEGNet for decoding cognitive states from scalp EEG."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Abdulmunim Jundurahman" }
+]
+keywords = ["eeg", "bci", "brain-computer-interface", "motor-imagery",
+            "mental-arithmetic", "cognitive-science", "machine-learning",
+            "fbcsp", "eegnet", "csp", "lda", "pytorch"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Intended Audience :: Science/Research",
+]
+
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "scikit-learn>=1.3",
+  "matplotlib>=3.7",
+  "mne>=1.5",
+  "torch>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["jupyter", "nbformat", "nbconvert", "ipykernel", "weasyprint"]
+
+[tool.setuptools.packages.find]
+include = ["eeg_cognitive*"]
+exclude = ["src*", "scripts*", "notebooks*", "results*", "slides*", "brief*"]

@@ -1,0 +1,44 @@
+# the legacy flat layout — superseded by eeg_cognitive/ + scripts/
+src/
+
+# slides — kept locally, not pushed to GitHub
+slides/
+
+# old single-notebook + its builder, superseded by 01-07_*.ipynb
+notebooks/05_demo.ipynb
+notebooks/build_demo_notebook.py
+
+# data caches (mne)
+data/
+
+# rendered preview images of the brief
+brief/brief-*.jpg
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# data caches (downloaded by mne)
+data/
+
+# generated PDF previews of the slide deck and brief
+slides/v*.jpg
+slides/slide-*.jpg
+slides/slidev2-*.jpg
+brief/brief-*.jpg
+
+# pptx build helpers (npm artifacts)
+slides/node_modules/
+slides/package-lock.json
+
+# environments
+.venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
