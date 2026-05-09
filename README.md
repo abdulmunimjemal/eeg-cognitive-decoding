@@ -37,15 +37,14 @@ cd eeg-cognitive-decoding
 # Install the package + dependencies
 pip install -e .[dev]
 
-# Reproduce every result, every figure, every notebook output
+# Reproduce all results, figures, and notebook outputs
 make all
 
-# Or run pieces individually
-make experiments     # 4 experiments → results/<dataset>_<model>.json
-make figures         # 16 figures → results/figures/
-make notebooks       # execute every notebook end-to-end
-make slides          # rebuild the 12-slide deck (needs Node + pptxgenjs)
-make brief           # rebuild the 24-page teaching brief
+# Or run individual stages
+make experiments   # run all experiments → results/<dataset>_<model>.json
+make figures       # render figures → results/figures/
+make notebooks     # execute notebooks end-to-end
+make clean         # remove generated outputs
 ```
 
 CPU is sufficient throughout — EEGNet has only ~2 400 parameters.
