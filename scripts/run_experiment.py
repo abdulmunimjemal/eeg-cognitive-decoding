@@ -2,10 +2,10 @@
 Run a single (dataset, model) experiment and save results JSON.
 
 Usage:
-    python src/run_one.py motor_imagery fbcsp
-    python src/run_one.py motor_imagery eegnet
-    python src/run_one.py mental_arithmetic fbcsp
-    python src/run_one.py mental_arithmetic eegnet
+    python scripts/run_experiment.py motor_imagery fbcsp
+    python scripts/run_experiment.py motor_imagery eegnet
+    python scripts/run_experiment.py mental_arithmetic fbcsp
+    python scripts/run_experiment.py mental_arithmetic eegnet
 """
 
 from __future__ import annotations
@@ -27,20 +27,8 @@ from eeg_cognitive.models import FBCSPClassifier
 from eeg_cognitive.models import EEGNetClassifier
 
 
-# Experiment-wide configuration. Centralized so the four runs are comparable.
-# SNR chosen so the easier 2-class arithmetic task is near-saturating and the
-# 4-class motor-imagery task lands in the published ballpark.
-SNR_DB = -12.0
 RESULTS_DIR = os.path.abspath(os.path.join(ROOT, "results"))
-
-
-DATASET_FACTORIES = {
-    "motor_imagery": lambda: make_motor_imagery_synthetic(
-        n_subjects=4, trials_per_class=20, snr_db=SNR_DB, seed=0),
-    "mental_arithmetic": lambda: make_mental_arithmetic_synthetic(
-        n_subjects=8, trials_per_class=20, trial_seconds=2.0,
-        snr_db=SNR_DB, seed=1),
-}
+DEFAULT_SNR_DB = -12.0
 
 
 def _make_eegnet(sfreq: float) -> EEGNetClassifier:
@@ -53,6 +41,19 @@ def _make_eegnet(sfreq: float) -> EEGNetClassifier:
     clf.sfreq = sfreq
     clf.eegnet_kernel_length = max(16, int(sfreq // 4))
     return clf
+
+
+def make_dataset(name: str, snr_db: float):
+    if name == "motor_imagery":
+        return make_motor_imagery_synthetic(
+            n_subjects=4, trials_per_class=20, snr_db=snr_db, seed=0,
+        )
+    if name == "mental_arithmetic":
+        return make_mental_arithmetic_synthetic(
+            n_subjects=8, trials_per_class=20, trial_seconds=2.0,
+            snr_db=snr_db, seed=1,
+        )
+    raise ValueError(name)
 
 
 def model_factory(name: str, sfreq: float):
@@ -77,13 +78,29 @@ def cv_to_dict(res, classes):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("dataset", choices=list(DATASET_FACTORIES.keys()))
+    ap = argparse.ArgumentParser(
+        description="Run one synthetic EEG decoding experiment and save its JSON summary.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    ap.add_argument("dataset", choices=["motor_imagery", "mental_arithmetic"])
     ap.add_argument("model", choices=["fbcsp", "eegnet"])
+    ap.add_argument(
+        "--snr-db",
+        type=float,
+        default=DEFAULT_SNR_DB,
+        help="SNR (dB) used when generating the synthetic dataset.",
+    )
+    ap.add_argument(
+        "--results-dir",
+        default=RESULTS_DIR,
+        help="Directory where the experiment JSON will be written.",
+    )
     args = ap.parse_args()
 
-    print(f"--- {args.dataset} × {args.model} (SNR={SNR_DB} dB) ---")
-    ds = DATASET_FACTORIES[args.dataset]()
+    results_dir = os.path.abspath(args.results_dir)
+
+    print(f"--- {args.dataset} × {args.model} (SNR={args.snr_db} dB) ---")
+    ds = make_dataset(args.dataset, args.snr_db)
     X = preprocess_epochs(ds.X, ds.sfreq)
     print(f"  X={X.shape}  classes={ds.class_names}")
 
@@ -96,9 +113,9 @@ def main():
     print(f"  summary: {res.summary()}  ({time.time()-t0:.1f}s)")
     print(f"  confusion:\n{np.array(res.confusion)}")
 
-    os.makedirs(RESULTS_DIR, exist_ok=True)
-    out_path = os.path.join(RESULTS_DIR, f"{args.dataset}_{args.model}.json")
-    with open(out_path, "w") as f:
+    os.makedirs(results_dir, exist_ok=True)
+    out_path = os.path.join(results_dir, f"{args.dataset}_{args.model}.json")
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(cv_to_dict(res, ds.class_names), f, indent=2)
     print(f"  → {out_path}")
 
