@@ -1,4 +1,4 @@
-# eeg-cognitive-decoding
+# EGG cognitive decoding
 
 > Comparing classical **FBCSP + LDA** against deep **EEGNet** for decoding
 > cognitive states from scalp EEG, across two qualitatively different
